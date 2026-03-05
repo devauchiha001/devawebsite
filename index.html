@@ -1157,74 +1157,75 @@
                                 an image here</p>
                             <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">JPG, PNG, WebP, GIF
                                 supported</p>
-                            <!-- Cloudinary upload progress -->
-                            <div id="cloudinary-progress" style="display:none;margin-top:20px;padding:0 10px;">
+                            <!-- Firebase upload progress -->
+                            <div id="firebase-progress" style="display:none;margin-top:20px;padding:0 10px;">
                                 <div
-                                    style="width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;border:1px solid rgba(0,245,255,0.2);">
-                                    <div id="cloudinary-progress-bar"
-                                        style="height:100%;width:0%;background:linear-gradient(90deg,#00f5ff,#bc13fe);transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 10px rgba(0,245,255,0.5);">
+                                    style="width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;border:1px solid rgba(255,107,0,0.2);">
+                                    <div id="firebase-progress-bar"
+                                        style="height:100%;width:0%;background:linear-gradient(90deg,#ff6b00,#ff9e00);transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 10px rgba(255,107,0,0.5);">
                                     </div>
                                 </div>
                                 <p
-                                    style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00f5ff;margin-top:10px;text-align:center;letter-spacing:1px;text-transform:uppercase;">
-                                    ☁️ Uploading to Cosmic Storage...</p>
+                                    style="font-family:'Orbitron',sans-serif;font-size:10px;color:#ff6b00;margin-top:10px;text-align:center;letter-spacing:1px;text-transform:uppercase;">
+                                    🔥 Uploading to Firebase...</p>
                             </div>
                         </div>
                         <input id="file-input" type="file" accept="image/*" style="display:none;"
                             onchange="handleFileSelect(event)" />
                         <img id="upload-preview" class="admin-preview-img" alt="preview" />
-                        <div id="cloudinary-url-display"
-                            style="display:none;margin-top:10px;padding:10px 14px;background:rgba(0,245,255,0.07);border:1px solid rgba(0,245,255,0.2);border-radius:10px;">
-                            <p style="font-family:'Orbitron',sans-serif;font-size:9px;color:#00f5ff;margin-bottom:4px;">
-                                ✅ CLOUDINARY URL READY</p>
-                            <p id="cloudinary-url-text" style="font-size:10px;color:#aaa;word-break:break-all;"></p>
+                        <div id="firebase-url-display"
+                            style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,0,0.07);border:1px solid rgba(255,107,0,0.2);border-radius:10px;">
+                            <p style="font-family:'Orbitron',sans-serif;font-size:9px;color:#ff6b00;margin-bottom:4px;">
+                                ✅ FIREBASE LINK READY</p>
+                            <p id="firebase-url-text" style="font-size:10px;color:#aaa;word-break:break-all;"></p>
                         </div>
-                    </div>
-
-                    <hr class="admin-divider" />
-
-                    <!-- Metadata -->
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-                        <div>
-                            <label
-                                style="font-family:'Orbitron',sans-serif;font-size:11px;color:#aaa;display:block;margin-bottom:6px;">TITLE</label>
-                            <input id="admin-title-input" class="admin-input" type="text"
-                                placeholder="e.g. Neon Sakura Night" />
-                        </div>
-                        <div>
-                            <label
-                                style="font-family:'Orbitron',sans-serif;font-size:11px;color:#aaa;display:block;margin-bottom:6px;">CATEGORY</label>
-                            <select id="admin-cat-input" class="admin-input" style="cursor:pointer;">
-                                <option value="nature">🌸 Nature</option>
-                                <option value="cyberpunk">⚡ Cyberpunk</option>
-                                <option value="fantasy">🐉 Fantasy</option>
-                                <option value="minimal">🌙 Minimal</option>
-                                <option value="admin">⭐ Special</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display:flex;gap:12px;">
-                        <button class="admin-btn-primary" onclick="adminAddImage()">✅ Add to Gallery</button>
-                        <button class="admin-btn-secondary" onclick="adminClearForm()">🗑 Clear</button>
                     </div>
                 </div>
 
-                <!-- TAB: Manage -->
-                <div id="admin-tab-manage" style="display:none;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                        <p style="font-family:'Orbitron',sans-serif;font-size:12px;color:#aaa;">Your added images (<span
-                                id="admin-count">0</span>)</p>
-                        <button class="admin-btn-secondary" onclick="adminClearAll()"
-                            style="font-size:11px;padding:7px 16px;">🗑 Clear All</button>
+                <hr class="admin-divider" />
+
+                <!-- Metadata -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                    <div>
+                        <label
+                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:#aaa;display:block;margin-bottom:6px;">TITLE</label>
+                        <input id="admin-title-input" class="admin-input" type="text"
+                            placeholder="e.g. Neon Sakura Night" />
                     </div>
-                    <div id="admin-manage-grid" class="admin-grid"></div>
-                    <p id="admin-empty-msg"
-                        style="text-align:center;color:rgba(255,255,255,0.25);font-family:'Orbitron',sans-serif;font-size:12px;padding:40px 0;display:none;">
-                        No images added yet.</p>
+                    <div>
+                        <label
+                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:#aaa;display:block;margin-bottom:6px;">CATEGORY</label>
+                        <select id="admin-cat-input" class="admin-input" style="cursor:pointer;">
+                            <option value="nature">🌸 Nature</option>
+                            <option value="cyberpunk">⚡ Cyberpunk</option>
+                            <option value="fantasy">🐉 Fantasy</option>
+                            <option value="minimal">🌙 Minimal</option>
+                            <option value="admin">⭐ Special</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:12px;">
+                    <button class="admin-btn-primary" onclick="adminAddImage()">✅ Add to Gallery</button>
+                    <button class="admin-btn-secondary" onclick="adminClearForm()">🗑 Clear</button>
                 </div>
             </div>
+
+            <!-- TAB: Manage -->
+            <div id="admin-tab-manage" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <p style="font-family:'Orbitron',sans-serif;font-size:12px;color:#aaa;">Your added images (<span
+                            id="admin-count">0</span>)</p>
+                    <button class="admin-btn-secondary" onclick="adminClearAll()"
+                        style="font-size:11px;padding:7px 16px;">🗑 Clear All</button>
+                </div>
+                <div id="admin-manage-grid" class="admin-grid"></div>
+                <p id="admin-empty-msg"
+                    style="text-align:center;color:rgba(255,255,255,0.25);font-family:'Orbitron',sans-serif;font-size:12px;padding:40px 0;display:none;">
+                    No images added yet.</p>
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- Toast Notification -->
@@ -1233,6 +1234,7 @@
         <span id="toast-icon">✅</span>
         <span id="toast-message" class="font-orbitron text-sm">Success!</span>
     </div>
+
 
     <script>
         // ─── AI Wallpaper Engine ─────────────────────────────────────────────────
@@ -1520,11 +1522,10 @@
         let adminUnlocked = false;
         let adminImages = [];      // [{id, url, title, category}]
         let currentSubTab = 'url'; // 'url' | 'upload'
-        let uploadedCloudinaryUrl = null; // Stores the Cloudinary URL after upload
+        let uploadedFirebaseUrl = null;
 
-        // ─── Cloudinary Config ────────────────────────────────────────────────────
-        const CLOUDINARY_CLOUD_NAME = 'dpc6usumz';
-        const CLOUDINARY_UPLOAD_PRESET = 'anime_wallpapers';
+        // ─── Firebase Config ────────────────────────────────────────────────────
+        // (Config is handled in the module script below)
 
         function openAdminPanel() {
             document.getElementById('admin-panel').classList.add('open');
@@ -1613,60 +1614,40 @@
                 document.getElementById('admin-title-input').value = toTitleCase(name);
             }
 
-            // Upload to Cloudinary
-            uploadedCloudinaryUrl = null;
-            document.getElementById('cloudinary-progress').style.display = 'block';
-            document.getElementById('cloudinary-url-display').style.display = 'none';
-            document.getElementById('drop-zone-icon').textContent = '☁️';
-            document.getElementById('drop-zone-text').textContent = 'Uploading...';
-
-            // Animate progress bar
-            let prog = 0;
-            const bar = document.getElementById('cloudinary-progress-bar');
-            const fakeProgress = setInterval(() => {
-                prog = Math.min(prog + Math.random() * 15, 85);
-                bar.style.width = prog + '%';
-            }, 300);
+            // Upload to Firebase
+            uploadedFirebaseUrl = null;
+            document.getElementById('firebase-progress').style.display = 'block';
+            document.getElementById('firebase-url-display').style.display = 'none';
+            document.getElementById('drop-zone-icon').textContent = '🔥';
+            document.getElementById('drop-zone-text').textContent = 'Igniting upload...';
 
             try {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                formData.append('tags', 'anime_zen_gallery'); // Add tag for central fetching
+                // Call the Firebase upload function exposed in window
+                const url = await window.uploadToFirebase(file, (progress) => {
+                    document.getElementById('firebase-progress-bar').style.width = progress + '%';
+                });
 
-                const response = await fetch(
-                    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-                    { method: 'POST', body: formData }
-                );
-                const data = await response.json();
-
-                clearInterval(fakeProgress);
-
-                if (data.secure_url) {
-                    uploadedCloudinaryUrl = data.secure_url;
-                    bar.style.width = '100%';
+                if (url) {
+                    uploadedFirebaseUrl = url;
                     setTimeout(() => {
-                        document.getElementById('cloudinary-progress').style.display = 'none';
-                        document.getElementById('cloudinary-url-display').style.display = 'block';
-                        document.getElementById('cloudinary-url-text').textContent = uploadedCloudinaryUrl;
+                        document.getElementById('firebase-progress').style.display = 'none';
+                        document.getElementById('firebase-url-display').style.display = 'block';
+                        document.getElementById('firebase-url-text').textContent = uploadedFirebaseUrl;
                         document.getElementById('drop-zone-icon').textContent = '✅';
                         document.getElementById('drop-zone-text').textContent = 'Transmission complete!';
                     }, 600);
-                    showToast('Cosmic link established! ☁️', '✅');
-                } else {
-                    throw new Error(data.error?.message || 'Upload failed');
+                    showToast('Link established with Firebase! 🔥', '✅');
                 }
             } catch (err) {
-                clearInterval(fakeProgress);
-                document.getElementById('cloudinary-progress').style.display = 'none';
+                document.getElementById('firebase-progress').style.display = 'none';
                 document.getElementById('drop-zone-icon').textContent = '❌';
                 document.getElementById('drop-zone-text').textContent = 'Upload failed. Try again.';
                 showToast('Upload failed: ' + err.message, '❌');
-                uploadedCloudinaryUrl = null;
+                uploadedFirebaseUrl = null;
             }
         }
 
-        function adminAddImage() {
+        async function adminAddImage() {
             const title = document.getElementById('admin-title-input').value.trim() || 'Admin Wallpaper';
             const category = document.getElementById('admin-cat-input').value;
 
@@ -1676,26 +1657,32 @@
                 imageUrl = document.getElementById('admin-url-input').value.trim();
                 if (!imageUrl) { showToast('Please enter an image URL!', '⚠️'); return; }
             } else {
-                if (!uploadedCloudinaryUrl) {
-                    showToast('Please wait for image to finish uploading to Cloudinary!', '⚠️');
+                if (!uploadedFirebaseUrl) {
+                    showToast('Please wait for image to finish uploading!', '⚠️');
                     return;
                 }
-                imageUrl = uploadedCloudinaryUrl;
+                imageUrl = uploadedFirebaseUrl;
             }
 
             const newEntry = {
-                id: Date.now(),
+                id: Date.now(), // Firestore will generate its own ID, but we keep this for local consistency
                 url: imageUrl,
                 title,
                 category,
                 author: 'Admin',
+                timestamp: new Date().getTime()
             };
 
-            adminImages.push(newEntry);
-            saveAdminImages();
-            renderWallpapers(staticFilter);
-            adminClearForm();
-            showToast(`"${title}" added to gallery! ☁️✅`, '🖼️');
+            // Save to Firebase Firestore
+            try {
+                await window.saveToFirestore(newEntry);
+                renderWallpapers(staticFilter);
+                adminClearForm();
+                showToast(`"${title}" added to Global Gallery! 🔥✅`, '🖼️');
+            } catch (e) {
+                showToast('Failed to save to database. Check console.', '❌');
+                console.error(e);
+            }
         }
 
         function adminClearForm() {
@@ -1703,12 +1690,12 @@
             document.getElementById('admin-title-input').value = '';
             document.getElementById('url-preview').style.display = 'none';
             document.getElementById('upload-preview').style.display = 'none';
-            document.getElementById('cloudinary-url-display').style.display = 'none';
-            document.getElementById('cloudinary-progress').style.display = 'none';
+            document.getElementById('firebase-url-display').style.display = 'none';
+            document.getElementById('firebase-progress').style.display = 'none';
             document.getElementById('drop-zone-icon').textContent = '🖼️';
             document.getElementById('drop-zone-text').textContent = 'Click or drag & drop an image here';
             document.getElementById('file-input').value = '';
-            uploadedCloudinaryUrl = null;
+            uploadedFirebaseUrl = null;
         }
 
         function refreshManageGrid() {
@@ -1731,36 +1718,48 @@
                 item.innerHTML = `
                     <img src="${img.url}" alt="${img.title}"
                         onerror="this.src='https://picsum.photos/200/150'">
-                    <button class="del-btn" onclick="adminDeleteImage(${img.id})" title="Delete">✕</button>
+                    <button class="del-btn" onclick="adminDeleteImage('${img.id}')" title="Delete">✕</button>
                     <div class="item-label">${img.title}</div>
                 `;
                 grid.appendChild(item);
             });
         }
 
-        function adminDeleteImage(id) {
-            adminImages = adminImages.filter(img => img.id !== id);
-            saveAdminImages();
-            refreshManageGrid();
-            renderWallpapers(staticFilter);
-            showToast('Image removed', '🗑️');
+        async function adminDeleteImage(id) {
+            if (!confirm('Delete this image from Global Gallery?')) return;
+            try {
+                await window.deleteFromFirestore(id);
+                adminImages = adminImages.filter(img => img.id !== id);
+                saveAdminImages(); // This will now save the filtered list
+                refreshManageGrid();
+                renderWallpapers(staticFilter);
+                showToast('Image removed from Global Gallery', '🗑️');
+            } catch (e) {
+                showToast('Failed to delete. Check console.', '❌');
+            }
         }
 
         function adminClearAll() {
             if (!confirm('Remove ALL admin images? This cannot be undone.')) return;
-            adminImages = [];
-            saveAdminImages();
-            refreshManageGrid();
-            renderWallpapers(staticFilter);
-            showToast('All admin images cleared', '🗑️');
+            // This would require iterating and deleting from Firestore, which is more complex.
+            // For now, we'll just clear the local adminImages and re-render.
+            // A full implementation would involve fetching all admin images from Firestore and deleting them one by one.
+            showToast('Clearing all admin images is not fully implemented for Firestore yet. Please delete manually.', '⚠️');
+            // adminImages = [];
+            // saveAdminImages();
+            // refreshManageGrid();
+            // renderWallpapers(staticFilter);
+            // showToast('All admin images cleared', '🗑️');
         }
 
         function saveAdminImages() {
-            // Only save metadata + base64 smaller images; large base64 might hit localStorage limit
+            // We are now primarily using Firestore for global images.
+            // This local storage is for images added *before* Firebase integration or for a different purpose.
+            // For now, we'll keep it for consistency with the original code's local adminImages array.
             try {
                 localStorage.setItem('animeZenAdminImages', JSON.stringify(adminImages));
             } catch (e) {
-                showToast('Storage full! Try using URLs instead of uploads.', '⚠️');
+                showToast('Local storage full! Some admin images might not be saved locally.', '⚠️');
             }
         }
 
@@ -1771,25 +1770,11 @@
             }
         }
 
-        async function fetchCloudinaryGallery() {
-            try {
-                // This requires "Resource list" ENABLED in Cloudinary settings -> Security
-                const response = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/anime_zen_gallery.json`);
-                if (!response.ok) return [];
-                const data = await response.json();
-
-                return data.resources.map(res => ({
-                    id: res.public_id,
-                    url: `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${res.public_id}.${res.format}`,
-                    title: toTitleCase(res.public_id.split('/').pop().replace(/[-_]/g, ' ')),
-                    category: 'admin', // default for uploaded images
-                    author: 'Admin',
-                    isCloudinary: true
-                }));
-            } catch (e) {
-                console.warn('Cloudinary list fetch failed. Ensure "Resource list" is enabled in Cloudinary settings.', e);
-                return [];
+        async function fetchFirebaseGallery() {
+            if (window.fetchFromFirestore) {
+                return await window.fetchFromFirestore();
             }
+            return [];
         }
 
         // ─── Static Data ─────────────────────────────────────────────────────────
@@ -1836,23 +1821,23 @@
             aiMode = false;        // exit AI mode when using static filter
 
             const grid = document.getElementById('wallpaper-grid');
-            if (filter !== 'all') grid.innerHTML = ''; // clear for specific filter
+            if (filter !== 'all') grid.innerHTML = '';
 
-            // 1. Get Cloudinary images (central for all users)
-            const cloudImages = await fetchCloudinaryGallery();
+            // 1. Get Firebase images (Global for all users)
+            const firebaseImages = await fetchFirebaseGallery();
 
             // 2. Filter images
-            const cloudFiltered = filter === 'all' ? cloudImages : cloudImages.filter(w => w.category === filter);
+            const firebaseFiltered = filter === 'all' ? firebaseImages : firebaseImages.filter(w => w.category === filter);
             const adminFiltered = filter === 'all' ? adminImages : adminImages.filter(w => w.category === filter);
             const staticFiltered = filter === 'all' ? wallpapers : wallpapers.filter(w => w.category === filter);
 
-            // Combine (Cloudinary first so new uploads appear at top)
-            const allItems = [...cloudFiltered, ...adminFiltered, ...staticFiltered];
+            // Combine (Firebase first so new uploads appear at top)
+            const allItems = [...firebaseFiltered, ...adminFiltered, ...staticFiltered];
 
-            grid.innerHTML = ''; // Final clear before render
+            grid.innerHTML = '';
 
             allItems.forEach((wallpaper, index) => {
-                const isAdmin = !!wallpaper.isBase64 || wallpaper.author === 'Admin' || wallpaper.isCloudinary;
+                const isAdmin = !!wallpaper.isBase64 || wallpaper.author === 'Admin' || !!wallpaper.isFirebase;
                 const card = document.createElement('div');
                 card.className = 'wallpaper-container glass-card rounded-2xl aspect-[4/3] cursor-pointer group';
                 card.style.animationDelay = `${index * 100}ms`;
@@ -2217,6 +2202,86 @@
 
         // Set initial quote
         currentQuote = quotes[0];
+    </script>
+
+    <!-- Firebase System Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsc5_XR9N1G31VXOvCqPIcfXJaWqr8Pu8",
+            authDomain: "anime-zen.firebaseapp.com",
+            projectId: "anime-zen",
+            storageBucket: "anime-zen.firebasestorage.app",
+            messagingSenderId: "124153503039",
+            appId: "1:124153503039:web:bc230f7fe75529b8be878a",
+            measurementId: "G-9SXGZ8HFTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- EXPORT TO GLOBAL WINDOW FOR MAIN SCRIPT ---
+
+        // 1. Upload File to Storage
+        window.uploadToFirebase = (file, onProgress) => {
+            return new Promise((resolve, reject) => {
+                const storageRef = ref(storage, 'wallpapers/' + Date.now() + '_' + file.name);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        if (onProgress) onProgress(progress);
+                    },
+                    (error) => reject(error),
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                            resolve(downloadURL);
+                        });
+                    }
+                );
+            });
+        };
+
+        // 2. Save Metadata to Firestore
+        window.saveToFirestore = async (data) => {
+            const docRef = await addDoc(collection(db, "gallery"), data);
+            return docRef.id;
+        };
+
+        // 3. Fetch Gallery from Firestore
+        window.fetchFromFirestore = async () => {
+            try {
+                const q = query(collection(db, "gallery"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({
+                    ...doc.data(),
+                    firestoreId: doc.id,
+                    isFirebase: true
+                }));
+            } catch (e) {
+                console.warn("Firestore fetch error:", e);
+                return [];
+            }
+        };
+
+        // 4. Delete from Firestore
+        window.deleteFromFirestore = async (id) => {
+            const q = query(collection(db, "gallery"), where("id", "==", id));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            });
+        };
+
+        // Trigger initial render once Firestore is ready
+        setTimeout(() => {
+            if (typeof renderWallpapers === 'function') renderWallpapers('all');
+        }, 1000);
     </script>
 </body>
 
