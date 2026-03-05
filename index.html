@@ -1158,16 +1158,16 @@
                             <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">JPG, PNG, WebP, GIF
                                 supported</p>
                             <!-- Cloudinary upload progress -->
-                            <div id="cloudinary-progress" style="display:none;margin-top:12px;">
+                            <div id="cloudinary-progress" style="display:none;margin-top:20px;padding:0 10px;">
                                 <div
-                                    style="width:100%;height:4px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                                    style="width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;border:1px solid rgba(0,245,255,0.2);">
                                     <div id="cloudinary-progress-bar"
-                                        style="height:100%;width:0%;background:linear-gradient(90deg,#00f5ff,#bc13fe);transition:width 0.3s ease;">
+                                        style="height:100%;width:0%;background:linear-gradient(90deg,#00f5ff,#bc13fe);transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 10px rgba(0,245,255,0.5);">
                                     </div>
                                 </div>
                                 <p
-                                    style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00f5ff;margin-top:6px;">
-                                    ☁️ Uploading to Cloudinary...</p>
+                                    style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00f5ff;margin-top:10px;text-align:center;letter-spacing:1px;text-transform:uppercase;">
+                                    ☁️ Uploading to Cosmic Storage...</p>
                             </div>
                         </div>
                         <input id="file-input" type="file" accept="image/*" style="display:none;"
@@ -1632,6 +1632,7 @@
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                formData.append('tags', 'anime_zen_gallery'); // Add tag for central fetching
 
                 const response = await fetch(
                     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -1649,9 +1650,9 @@
                         document.getElementById('cloudinary-url-display').style.display = 'block';
                         document.getElementById('cloudinary-url-text').textContent = uploadedCloudinaryUrl;
                         document.getElementById('drop-zone-icon').textContent = '✅';
-                        document.getElementById('drop-zone-text').textContent = 'Upload complete!';
-                    }, 400);
-                    showToast('Image uploaded to Cloudinary! ☁️', '✅');
+                        document.getElementById('drop-zone-text').textContent = 'Transmission complete!';
+                    }, 600);
+                    showToast('Cosmic link established! ☁️', '✅');
                 } else {
                     throw new Error(data.error?.message || 'Upload failed');
                 }
@@ -1770,6 +1771,27 @@
             }
         }
 
+        async function fetchCloudinaryGallery() {
+            try {
+                // This requires "Resource list" ENABLED in Cloudinary settings -> Security
+                const response = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/anime_zen_gallery.json`);
+                if (!response.ok) return [];
+                const data = await response.json();
+
+                return data.resources.map(res => ({
+                    id: res.public_id,
+                    url: `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${res.public_id}.${res.format}`,
+                    title: toTitleCase(res.public_id.split('/').pop().replace(/[-_]/g, ' ')),
+                    category: 'admin', // default for uploaded images
+                    author: 'Admin',
+                    isCloudinary: true
+                }));
+            } catch (e) {
+                console.warn('Cloudinary list fetch failed. Ensure "Resource list" is enabled in Cloudinary settings.', e);
+                return [];
+            }
+        }
+
         // ─── Static Data ─────────────────────────────────────────────────────────
         const wallpapers = [
             { id: 1, url: 'https://images.unsplash.com/photo-1541562232579-512a21360020?w=800&q=80', category: 'nature', title: 'Cherry Blossom Dreams', author: 'Sakura Art' },
@@ -1809,25 +1831,28 @@
         });
 
         // Wallpaper Functions
-        function renderWallpapers(filter) {
+        async function renderWallpapers(filter) {
             staticFilter = filter; // track for admin re-renders
             aiMode = false;        // exit AI mode when using static filter
 
             const grid = document.getElementById('wallpaper-grid');
-            grid.innerHTML = '';
+            if (filter !== 'all') grid.innerHTML = ''; // clear for specific filter
 
-            // Merge static + admin images
-            const adminFiltered = filter === 'all'
-                ? adminImages
-                : adminImages.filter(w => w.category === filter);
-            const staticFiltered = filter === 'all'
-                ? wallpapers
-                : wallpapers.filter(w => w.category === filter);
+            // 1. Get Cloudinary images (central for all users)
+            const cloudImages = await fetchCloudinaryGallery();
 
-            const allItems = [...adminFiltered, ...staticFiltered];
+            // 2. Filter images
+            const cloudFiltered = filter === 'all' ? cloudImages : cloudImages.filter(w => w.category === filter);
+            const adminFiltered = filter === 'all' ? adminImages : adminImages.filter(w => w.category === filter);
+            const staticFiltered = filter === 'all' ? wallpapers : wallpapers.filter(w => w.category === filter);
+
+            // Combine (Cloudinary first so new uploads appear at top)
+            const allItems = [...cloudFiltered, ...adminFiltered, ...staticFiltered];
+
+            grid.innerHTML = ''; // Final clear before render
 
             allItems.forEach((wallpaper, index) => {
-                const isAdmin = !!wallpaper.isBase64 || wallpaper.author === 'Admin';
+                const isAdmin = !!wallpaper.isBase64 || wallpaper.author === 'Admin' || wallpaper.isCloudinary;
                 const card = document.createElement('div');
                 card.className = 'wallpaper-container glass-card rounded-2xl aspect-[4/3] cursor-pointer group';
                 card.style.animationDelay = `${index * 100}ms`;
