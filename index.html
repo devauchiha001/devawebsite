@@ -1661,8 +1661,11 @@
         }
 
         async function adminAddImage() {
-            const title = document.getElementById('admin-title-input').value.trim() || 'Admin Wallpaper';
-            const category = document.getElementById('admin-cat-input').value;
+            console.log('Admin: Attempting to add image...');
+            const titleInput = document.getElementById('admin-title-input');
+            const catInput = document.getElementById('admin-cat-input');
+            const title = titleInput.value.trim() || 'Admin Wallpaper';
+            const category = catInput.value;
 
             let imageUrl = null;
 
@@ -1678,7 +1681,7 @@
             }
 
             const newEntry = {
-                id: Date.now(), // Firestore will generate its own ID, but we keep this for local consistency
+                id: Date.now(),
                 url: imageUrl,
                 title,
                 category,
@@ -1688,13 +1691,21 @@
 
             // Save to Firebase Firestore
             try {
+                if (typeof window.saveToFirestore !== 'function') {
+                    throw new Error('Database connection not ready. Please wait 2 seconds and try again.');
+                }
+
+                showToast('Syncing with Global Gallery...', '⏳');
                 await window.saveToFirestore(newEntry);
-                renderWallpapers(staticFilter);
+
+                // Clear and Refresh
                 adminClearForm();
+                await renderWallpapers(staticFilter);
                 showToast(`"${title}" added to Global Gallery! 🔥✅`, '🖼️');
+                console.log('Admin: Successfully added to Global Gallery');
             } catch (e) {
-                showToast('Failed to save to database. Check console.', '❌');
-                console.error(e);
+                showToast('Database Error: ' + e.message, '❌');
+                console.error('Firestore Save Error:', e);
             }
         }
 
@@ -1711,27 +1722,34 @@
             uploadedFirebaseUrl = null;
         }
 
-        function refreshManageGrid() {
+        async function refreshManageGrid() {
             const grid = document.getElementById('admin-manage-grid');
             const emptyMsg = document.getElementById('admin-empty-msg');
             const countEl = document.getElementById('admin-count');
 
-            countEl.textContent = adminImages.length;
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#aaa;">Loading Global Gallery...</div>';
+
+            // Fetch latest from Firebase
+            const globalImages = await fetchFirebaseGallery();
+            const displayImages = [...globalImages, ...adminImages]; // Merge firebase + local
+
+            countEl.textContent = displayImages.length;
             grid.innerHTML = '';
 
-            if (adminImages.length === 0) {
+            if (displayImages.length === 0) {
                 emptyMsg.style.display = 'block';
                 return;
             }
             emptyMsg.style.display = 'none';
 
-            adminImages.forEach(img => {
+            displayImages.forEach(img => {
                 const item = document.createElement('div');
                 item.className = 'admin-grid-item';
+                const deleteId = img.firestoreId || img.id;
                 item.innerHTML = `
                     <img src="${img.url}" alt="${img.title}"
                         onerror="this.src='https://picsum.photos/200/150'">
-                    <button class="del-btn" onclick="adminDeleteImage('${img.id}')" title="Delete">✕</button>
+                    <button class="del-btn" onclick="adminDeleteImage('${deleteId}')" title="Delete">✕</button>
                     <div class="item-label">${img.title}</div>
                 `;
                 grid.appendChild(item);
@@ -1741,14 +1759,21 @@
         async function adminDeleteImage(id) {
             if (!confirm('Delete this image from Global Gallery?')) return;
             try {
+                if (typeof window.deleteFromFirestore !== 'function') throw new Error('DB not ready');
+
+                showToast('Removing from Galaxy...', '🗑️');
                 await window.deleteFromFirestore(id);
-                adminImages = adminImages.filter(img => img.id !== id);
-                saveAdminImages(); // This will now save the filtered list
-                refreshManageGrid();
-                renderWallpapers(staticFilter);
-                showToast('Image removed from Global Gallery', '🗑️');
+
+                // Cleanup local if it was there
+                adminImages = adminImages.filter(img => img.id != id);
+                saveAdminImages();
+
+                await refreshManageGrid();
+                await renderWallpapers(staticFilter);
+                showToast('Image removed successfully', '✅');
             } catch (e) {
-                showToast('Failed to delete. Check console.', '❌');
+                showToast('Delete failed: ' + e.message, '❌');
+                console.error(e);
             }
         }
 
@@ -2220,7 +2245,7 @@
     <!-- Firebase System Module (Database Only) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAsc5_XR9N1G31VXOvCqPIcfXJaWqr8Pu8",
@@ -2260,17 +2285,27 @@
         // 4. Delete from Firestore
         window.deleteFromFirestore = async (id) => {
             try {
-                const q = query(collection(db, "gallery"), where("id", "==", id));
+                // Try deleting by document reference first (if it's a firestoreId)
+                try {
+                    const docRef = doc(db, "gallery", id);
+                    await deleteDoc(docRef);
+                    return;
+                } catch (err) { }
+
+                // Fallback: search for the custom 'id' field
+                const q = query(collection(db, "gallery"), where("id", "==", parseInt(id) || id));
                 const querySnapshot = await getDocs(q);
-                querySnapshot.forEach(async (doc) => {
-                    await deleteDoc(doc.ref);
+                querySnapshot.forEach(async (d) => {
+                    await deleteDoc(d.ref);
                 });
             } catch (e) {
                 console.error("Firestore delete error:", e);
+                throw e;
             }
         };
 
         // Initial fetch
+        console.log('Firebase: Database system online.');
         setTimeout(() => {
             if (typeof renderWallpapers === 'function') renderWallpapers('all');
         }, 1000);
