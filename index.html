@@ -1522,9 +1522,13 @@
         let adminUnlocked = false;
         let adminImages = [];      // [{id, url, title, category}]
         let currentSubTab = 'url'; // 'url' | 'upload'
-        let uploadedFirebaseUrl = null;
+        let uploadedFirebaseUrl = null; // We'll store Cloudinary URL here for compatibility
 
-        // ─── Firebase Config ────────────────────────────────────────────────────
+        // ─── Cloudinary Config (IMAGE STORAGE) ──────────────────────────────────
+        const CLOUDINARY_CLOUD_NAME = 'dpc6usumz';
+        const CLOUDINARY_UPLOAD_PRESET = 'anime_wallpapers';
+
+        // ─── Firebase Config (DATABASE) ─────────────────────────────────────────
         // (Config is handled in the module script below)
 
         function openAdminPanel() {
@@ -1614,21 +1618,28 @@
                 document.getElementById('admin-title-input').value = toTitleCase(name);
             }
 
-            // Upload to Firebase
+            // Upload to Cloudinary (Free Hosting)
             uploadedFirebaseUrl = null;
             document.getElementById('firebase-progress').style.display = 'block';
             document.getElementById('firebase-url-display').style.display = 'none';
-            document.getElementById('drop-zone-icon').textContent = '🔥';
-            document.getElementById('drop-zone-text').textContent = 'Igniting upload...';
+            document.getElementById('drop-zone-icon').textContent = '☁️';
+            document.getElementById('drop-zone-text').textContent = 'Opening Portal...';
 
             try {
-                // Call the Firebase upload function exposed in window
-                const url = await window.uploadToFirebase(file, (progress) => {
-                    document.getElementById('firebase-progress-bar').style.width = progress + '%';
-                });
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-                if (url) {
-                    uploadedFirebaseUrl = url;
+                const response = await fetch(
+                    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    { method: 'POST', body: formData }
+                );
+                const data = await response.json();
+
+                if (data.secure_url) {
+                    uploadedFirebaseUrl = data.secure_url;
+                    document.getElementById('firebase-progress-bar').style.width = '100%';
+
                     setTimeout(() => {
                         document.getElementById('firebase-progress').style.display = 'none';
                         document.getElementById('firebase-url-display').style.display = 'block';
@@ -1636,7 +1647,9 @@
                         document.getElementById('drop-zone-icon').textContent = '✅';
                         document.getElementById('drop-zone-text').textContent = 'Transmission complete!';
                     }, 600);
-                    showToast('Link established with Firebase! 🔥', '✅');
+                    showToast('Image uploaded safely! 🚀', '✅');
+                } else {
+                    throw new Error(data.error?.message || 'Upload failed');
                 }
             } catch (err) {
                 document.getElementById('firebase-progress').style.display = 'none';
@@ -2204,11 +2217,10 @@
         currentQuote = quotes[0];
     </script>
 
-    <!-- Firebase System Module -->
+    <!-- Firebase System Module (Database Only) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAsc5_XR9N1G31VXOvCqPIcfXJaWqr8Pu8",
@@ -2222,30 +2234,6 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        // --- EXPORT TO GLOBAL WINDOW FOR MAIN SCRIPT ---
-
-        // 1. Upload File to Storage
-        window.uploadToFirebase = (file, onProgress) => {
-            return new Promise((resolve, reject) => {
-                const storageRef = ref(storage, 'wallpapers/' + Date.now() + '_' + file.name);
-                const uploadTask = uploadBytesResumable(storageRef, file);
-
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        if (onProgress) onProgress(progress);
-                    },
-                    (error) => reject(error),
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                            resolve(downloadURL);
-                        });
-                    }
-                );
-            });
-        };
 
         // 2. Save Metadata to Firestore
         window.saveToFirestore = async (data) => {
@@ -2271,14 +2259,18 @@
 
         // 4. Delete from Firestore
         window.deleteFromFirestore = async (id) => {
-            const q = query(collection(db, "gallery"), where("id", "==", id));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach(async (doc) => {
-                await deleteDoc(doc.ref);
-            });
+            try {
+                const q = query(collection(db, "gallery"), where("id", "==", id));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+            } catch (e) {
+                console.error("Firestore delete error:", e);
+            }
         };
 
-        // Trigger initial render once Firestore is ready
+        // Initial fetch
         setTimeout(() => {
             if (typeof renderWallpapers === 'function') renderWallpapers('all');
         }, 1000);
