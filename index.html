@@ -1200,6 +1200,7 @@
                             <option value="cyberpunk">⚡ Cyberpunk</option>
                             <option value="fantasy">🐉 Fantasy</option>
                             <option value="minimal">🌙 Minimal</option>
+                            <option value="anime">🎌 Anime</option>
                             <option value="admin">⭐ Special</option>
                         </select>
                     </div>
@@ -1598,27 +1599,59 @@
             if (file && file.type.startsWith('image/')) processFile(file);
         }
 
-        async function processFile(file) {
-            // Show local preview immediately
+        function processFile(file) {
+            uploadedFirebaseUrl = null;
+            document.getElementById('drop-zone-icon').textContent = '⏳';
+            document.getElementById('drop-zone-text').textContent = 'Compressing image...';
+
+            // Auto-fill title from filename
+            if (!document.getElementById('admin-title-input').value) {
+                const name = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+                document.getElementById('admin-title-input').value = toTitleCase(name);
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.getElementById('upload-preview');
-                const dataUrl = e.target.result;
-                img.src = dataUrl;
-                img.style.display = 'block';
-                uploadedFirebaseUrl = dataUrl; // We store the Base64 string here
+                const originalDataUrl = e.target.result;
 
-                // Auto-fill title from filename
-                if (!document.getElementById('admin-title-input').value) {
-                    const name = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-                    document.getElementById('admin-title-input').value = toTitleCase(name);
-                }
+                // Show full-quality preview
+                const preview = document.getElementById('upload-preview');
+                preview.src = originalDataUrl;
+                preview.style.display = 'block';
 
-                document.getElementById('firebase-url-display').style.display = 'block';
-                document.getElementById('firebase-url-text').textContent = 'Base64 Data Ready';
-                document.getElementById('drop-zone-icon').textContent = '✅';
-                document.getElementById('drop-zone-text').textContent = 'Image encoded for Database!';
-                showToast('Image processed for upload! 🚀', '✅');
+                // Resize & compress to keep under RTDB 10MB limit
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 1280;
+                    let w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                        else { w = Math.round(w * MAX / h); h = MAX; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+                    // Compress to JPEG at 80% quality
+                    const compressed = canvas.toDataURL('image/jpeg', 0.80);
+                    const sizeKB = Math.round(compressed.length * 0.75 / 1024);
+
+                    if (compressed.length * 0.75 > 9 * 1024 * 1024) {
+                        document.getElementById('drop-zone-icon').textContent = '❌';
+                        document.getElementById('drop-zone-text').textContent = `Image too large (${sizeKB}KB). Please use the URL tab instead.`;
+                        showToast('Image too large! Use URL tab instead.', '❌');
+                        return;
+                    }
+
+                    uploadedFirebaseUrl = compressed;
+                    document.getElementById('firebase-url-display').style.display = 'block';
+                    document.getElementById('firebase-url-text').textContent = `Compressed: ${sizeKB}KB — Ready to save!`;
+                    document.getElementById('drop-zone-icon').textContent = '✅';
+                    document.getElementById('drop-zone-text').textContent = 'Image ready for Database!';
+                    showToast(`Image compressed to ${sizeKB}KB ✅`, '🖼️');
+                };
+                img.src = originalDataUrl;
             };
             reader.readAsDataURL(file);
         }
@@ -1809,11 +1842,13 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadAdminImages();   // load admin images before first render
+            loadAdminImages();
             renderWallpapers('all');
             renderQuotes();
             initParticles();
             loadFavorites();
+            dailyQuoteRotation();  // Set today's featured quote
+            setTimeout(dailyAutoUpload, 2500); // Auto-upload after Firebase is ready
         });
 
         // Wallpaper Functions
@@ -1838,15 +1873,13 @@
             grid.innerHTML = '';
 
             allItems.forEach((wallpaper, index) => {
-                const isAdmin = !!wallpaper.isBase64 || wallpaper.author === 'Admin' || !!wallpaper.isFirebase;
                 const card = document.createElement('div');
                 card.className = 'wallpaper-container glass-card rounded-2xl aspect-[4/3] cursor-pointer group';
                 card.style.animationDelay = `${index * 100}ms`;
                 card.innerHTML = `
-                    ${isAdmin ? '<span class="admin-badge">⭐ Admin</span>' : ''}
                     <img src="${wallpaper.url}" alt="${wallpaper.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                     <div class="wallpaper-overlay">
-                        <div class="text-xs ${isAdmin ? 'text-orange-400' : 'text-cyan-400'} font-orbitron mb-1 uppercase tracking-wider">${isAdmin ? 'Admin Pick' : wallpaper.category}</div>
+                        <div class="text-xs text-cyan-400 font-orbitron mb-1 uppercase tracking-wider">${wallpaper.category || 'anime'}</div>
                         <h3 class="text-xl font-bold mb-1">${wallpaper.title}</h3>
                         <p class="text-gray-300 text-sm mb-4">by ${wallpaper.author}</p>
                         <div class="flex space-x-2">
@@ -2203,6 +2236,80 @@
 
         // Set initial quote
         currentQuote = quotes[0];
+
+        // ─── Daily Quote Rotation ─────────────────────────────────────────────────
+        function dailyQuoteRotation() {
+            // Use day-of-year as seed so every visitor sees the same quote today
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const dayOfYear = Math.floor((now - start) / 86400000);
+            const todayIndex = dayOfYear % quotes.length;
+            setFeaturedQuote(quotes[todayIndex]);
+        }
+
+        // ─── Daily AI Auto-Upload ─────────────────────────────────────────────────
+        async function dailyAutoUpload() {
+            const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+            const storageKey = 'animeZenDailyUpload_' + today;
+
+            // Only run once per day per browser (quick guard)
+            if (localStorage.getItem(storageKey)) return;
+
+            // Also guard using RTDB so it doesn't hammer the API on every browser
+            if (typeof window.checkAndSetDailyUpload !== 'function') return;
+            const alreadyDone = await window.checkAndSetDailyUpload(today);
+            if (alreadyDone) {
+                localStorage.setItem(storageKey, '1');
+                return;
+            }
+
+            console.log('🤖 Daily Auto-Upload: Fetching new anime wallpapers for', today);
+
+            const DAILY_TAGS = [
+                'waifu', 'maid', 'neko', 'shinobu', 'megumin',
+                'zero-two', 'raiden-shogun', 'marin-kitagawa', 'yor-briar', 'power'
+            ];
+
+            // Pick 2 random tags for today (based on date for variety)
+            const seed = parseInt(today.replace(/-/g, ''));
+            const tag1 = DAILY_TAGS[seed % DAILY_TAGS.length];
+            const tag2 = DAILY_TAGS[(seed + 3) % DAILY_TAGS.length];
+            const tags = [tag1, tag2];
+
+            let uploaded = 0;
+            for (const tag of tags) {
+                try {
+                    const res = await fetch(`https://api.waifu.im/search/?included_tags=${tag}&many=true&limit=3`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    for (const img of (data.images || [])) {
+                        if (!img.url) continue;
+                        const entry = {
+                            id: Date.now() + Math.random(),
+                            url: img.url,
+                            title: `${tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} #${today}`,
+                            category: 'anime',
+                            author: '🤖 AI Daily',
+                            timestamp: new Date().getTime()
+                        };
+                        if (typeof window.saveToFirestore === 'function') {
+                            await window.saveToFirestore(entry);
+                            uploaded++;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Daily upload error for tag', tag, err);
+                }
+            }
+
+            if (uploaded > 0) {
+                localStorage.setItem(storageKey, '1');
+                console.log(`✅ Daily Auto-Upload: Added ${uploaded} new anime wallpapers.`);
+                // Refresh gallery so new images appear
+                await renderWallpapers(staticFilter);
+                showToast(`🤖 ${uploaded} new daily anime wallpapers added!`, '🎌');
+            }
+        }
     </script>
 
     <script type="module">
@@ -2259,6 +2366,20 @@
             } catch (e) {
                 console.error("RTDB delete error:", e);
                 throw e;
+            }
+        };
+
+        // 4. Daily seed check — prevents every browser from uploading
+        window.checkAndSetDailyUpload = async (today) => {
+            try {
+                const seedRef = ref(db, `daily-seed/${today}`);
+                const snapshot = await get(seedRef);
+                if (snapshot.exists()) return true; // Already seeded today
+                await set(seedRef, { seeded: true, ts: Date.now() });
+                return false; // We just claimed it — proceed with upload
+            } catch (e) {
+                console.warn('Daily seed check failed:', e);
+                return true; // Fail safe — don't upload if we can't check
             }
         };
 
