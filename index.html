@@ -1522,11 +1522,7 @@
         let adminUnlocked = false;
         let adminImages = [];      // [{id, url, title, category}]
         let currentSubTab = 'url'; // 'url' | 'upload'
-        let uploadedFirebaseUrl = null; // We'll store Cloudinary URL here for compatibility
-
-        // ─── Cloudinary Config (IMAGE STORAGE) ──────────────────────────────────
-        const CLOUDINARY_CLOUD_NAME = 'dpc6usumz';
-        const CLOUDINARY_UPLOAD_PRESET = 'anime_wallpapers';
+        let uploadedFirebaseUrl = null; // Stores the URL of the image uploaded to Firebase Storage
 
         // ─── Firebase Config (DATABASE) ─────────────────────────────────────────
         // (Config is handled in the module script below)
@@ -1607,57 +1603,24 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = document.getElementById('upload-preview');
-                img.src = e.target.result;
+                const dataUrl = e.target.result;
+                img.src = dataUrl;
                 img.style.display = 'block';
+                uploadedFirebaseUrl = dataUrl; // We store the Base64 string here
+
+                // Auto-fill title from filename
+                if (!document.getElementById('admin-title-input').value) {
+                    const name = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+                    document.getElementById('admin-title-input').value = toTitleCase(name);
+                }
+
+                document.getElementById('firebase-url-display').style.display = 'block';
+                document.getElementById('firebase-url-text').textContent = 'Base64 Data Ready';
+                document.getElementById('drop-zone-icon').textContent = '✅';
+                document.getElementById('drop-zone-text').textContent = 'Image encoded for Database!';
+                showToast('Image processed for upload! 🚀', '✅');
             };
             reader.readAsDataURL(file);
-
-            // Auto-fill title from filename
-            if (!document.getElementById('admin-title-input').value) {
-                const name = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-                document.getElementById('admin-title-input').value = toTitleCase(name);
-            }
-
-            // Upload to Cloudinary (Free Hosting)
-            uploadedFirebaseUrl = null;
-            document.getElementById('firebase-progress').style.display = 'block';
-            document.getElementById('firebase-url-display').style.display = 'none';
-            document.getElementById('drop-zone-icon').textContent = '☁️';
-            document.getElementById('drop-zone-text').textContent = 'Opening Portal...';
-
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-                const response = await fetch(
-                    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-                    { method: 'POST', body: formData }
-                );
-                const data = await response.json();
-
-                if (data.secure_url) {
-                    uploadedFirebaseUrl = data.secure_url;
-                    document.getElementById('firebase-progress-bar').style.width = '100%';
-
-                    setTimeout(() => {
-                        document.getElementById('firebase-progress').style.display = 'none';
-                        document.getElementById('firebase-url-display').style.display = 'block';
-                        document.getElementById('firebase-url-text').textContent = uploadedFirebaseUrl;
-                        document.getElementById('drop-zone-icon').textContent = '✅';
-                        document.getElementById('drop-zone-text').textContent = 'Transmission complete!';
-                    }, 600);
-                    showToast('Image uploaded safely! 🚀', '✅');
-                } else {
-                    throw new Error(data.error?.message || 'Upload failed');
-                }
-            } catch (err) {
-                document.getElementById('firebase-progress').style.display = 'none';
-                document.getElementById('drop-zone-icon').textContent = '❌';
-                document.getElementById('drop-zone-text').textContent = 'Upload failed. Try again.';
-                showToast('Upload failed: ' + err.message, '❌');
-                uploadedFirebaseUrl = null;
-            }
         }
 
         async function adminAddImage() {
@@ -2242,15 +2205,15 @@
         currentQuote = quotes[0];
     </script>
 
-    <!-- Firebase System Module (Database Only) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, push, set, get, remove, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAsc5_XR9N1G31VXOvCqPIcfXJaWqr8Pu8",
             authDomain: "anime-zen.firebaseapp.com",
             projectId: "anime-zen",
+            databaseURL: "https://anime-zen-default-rtdb.asia-southeast1.firebasedatabase.app",
             storageBucket: "anime-zen.firebasestorage.app",
             messagingSenderId: "124153503039",
             appId: "1:124153503039:web:bc230f7fe75529b8be878a",
@@ -2258,54 +2221,48 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
-        // 2. Save Metadata to Firestore
+        // 1. Save to Realtime Database
         window.saveToFirestore = async (data) => {
-            const docRef = await addDoc(collection(db, "gallery"), data);
-            return docRef.id;
+            const galleryRef = ref(db, 'gallery');
+            const newEntryRef = push(galleryRef);
+            await set(newEntryRef, data);
+            return newEntryRef.key;
         };
 
-        // 3. Fetch Gallery from Firestore
+        // 2. Fetch from Realtime Database
         window.fetchFromFirestore = async () => {
             try {
-                const q = query(collection(db, "gallery"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                return querySnapshot.docs.map(doc => ({
-                    ...doc.data(),
-                    firestoreId: doc.id,
-                    isFirebase: true
-                }));
+                const galleryRef = ref(db, 'gallery');
+                const snapshot = await get(galleryRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    return Object.keys(data).map(key => ({
+                        ...data[key],
+                        firestoreId: key,
+                        isFirebase: true
+                    })).reverse(); // Newest first
+                }
+                return [];
             } catch (e) {
-                console.warn("Firestore fetch error:", e);
+                console.warn("RTDB fetch error:", e);
                 return [];
             }
         };
 
-        // 4. Delete from Firestore
+        // 3. Delete from Realtime Database
         window.deleteFromFirestore = async (id) => {
             try {
-                // Try deleting by document reference first (if it's a firestoreId)
-                try {
-                    const docRef = doc(db, "gallery", id);
-                    await deleteDoc(docRef);
-                    return;
-                } catch (err) { }
-
-                // Fallback: search for the custom 'id' field
-                const q = query(collection(db, "gallery"), where("id", "==", parseInt(id) || id));
-                const querySnapshot = await getDocs(q);
-                querySnapshot.forEach(async (d) => {
-                    await deleteDoc(d.ref);
-                });
+                const entryRef = ref(db, `gallery/${id}`);
+                await remove(entryRef);
             } catch (e) {
-                console.error("Firestore delete error:", e);
+                console.error("RTDB delete error:", e);
                 throw e;
             }
         };
 
-        // Initial fetch
-        console.log('Firebase: Database system online.');
+        console.log('Firebase: Realtime Database online.');
         setTimeout(() => {
             if (typeof renderWallpapers === 'function') renderWallpapers('all');
         }, 1000);
