@@ -2360,55 +2360,71 @@
             }
 
             // ── 2. ALL OTHER CATEGORIES — from Unsplash (2 images each = 8 more/day)
+            // ── 2. ALL OTHER CATEGORIES — from loremflickr.com (free, keyword-based, active API)
             const CATEGORY_SOURCES = [
                 {
                     category: 'nature',
-                    keywords: ['cherry blossom japan', 'japanese garden zen', 'misty mountain forest',
-                        'bamboo forest morning', 'koi pond reflection', 'japanese temple garden'],
-                    titles: ['Cherry Blossom Serenity', 'Zen Garden Peace', 'Misty Mountain Spirit',
-                        'Bamboo Forest Dawn', 'Sacred Koi Pond', 'Temple Garden Calm']
+                    batches: [
+                        { tags: 'cherry-blossom,japan,sakura', title: 'Cherry Blossom Serenity' },
+                        { tags: 'japanese-garden,zen,kyoto', title: 'Zen Garden Peace' },
+                        { tags: 'bamboo,forest,nature,japan', title: 'Bamboo Forest Dawn' },
+                        { tags: 'mountain,mist,japan,landscape', title: 'Misty Mountain Spirit' },
+                        { tags: 'koi,pond,japanese,water', title: 'Sacred Koi Pond' },
+                        { tags: 'temple,shrine,japan,forest', title: 'Temple Garden Calm' },
+                    ]
                 },
                 {
                     category: 'cyberpunk',
-                    keywords: ['cyberpunk neon city night', 'tokyo neon rain street',
-                        'futuristic city lights', 'synthwave retrowave city', 'neon arcade japan'],
-                    titles: ['Neon City Dreams', 'Tokyo Rain Nights', 'Future City Pulse',
-                        'Synthwave Horizon', 'Neon Arcade Glow']
+                    batches: [
+                        { tags: 'neon,city,night,lights', title: 'Neon City Dreams' },
+                        { tags: 'tokyo,rain,street,night', title: 'Tokyo Rain Nights' },
+                        { tags: 'futuristic,city,skyscraper', title: 'Future City Pulse' },
+                        { tags: 'synthwave,sunset,retro', title: 'Synthwave Horizon' },
+                        { tags: 'neon,arcade,japan,night', title: 'Neon Arcade Glow' },
+                    ]
                 },
                 {
                     category: 'fantasy',
-                    keywords: ['fantasy dragon castle', 'enchanted forest magic light',
-                        'magical floating islands', 'ancient ruins mystical', 'epic sunset fantasy castle'],
-                    titles: ['Dragon Keep at Dusk', 'Enchanted Forest Magic', 'Floating Sky Islands',
-                        'Ancient Mystic Ruins', 'Fantasy Kingdom Sunset']
+                    batches: [
+                        { tags: 'dragon,castle,fantasy,epic', title: 'Dragon Keep at Dusk' },
+                        { tags: 'enchanted,forest,magic,light', title: 'Enchanted Forest Magic' },
+                        { tags: 'sky,islands,floating,clouds', title: 'Floating Sky Islands' },
+                        { tags: 'ruins,mystical,ancient,stone', title: 'Ancient Mystic Ruins' },
+                        { tags: 'fantasy,sunset,castle,glow', title: 'Fantasy Kingdom Sunset' },
+                    ]
                 },
                 {
                     category: 'minimal',
-                    keywords: ['minimalist moon night sky', 'dark aesthetic minimal',
-                        'zen simple black white', 'night starry sky minimal', 'misty lake sunrise minimal'],
-                    titles: ['Silent Moon', 'Dark Minimal Vibes', 'Zen Simplicity',
-                        'Starlit Night', 'Misty Lake Dawn']
+                    batches: [
+                        { tags: 'moon,night,sky,minimal', title: 'Silent Moon' },
+                        { tags: 'dark,aesthetic,minimal,black', title: 'Dark Minimal Vibes' },
+                        { tags: 'starry,sky,night,stars', title: 'Starlit Night' },
+                        { tags: 'lake,sunrise,mist,calm', title: 'Misty Lake Dawn' },
+                        { tags: 'zen,minimal,simple,white', title: 'Zen Simplicity' },
+                    ]
                 }
             ];
 
             for (const source of CATEGORY_SOURCES) {
                 try {
-                    // Pick a keyword based on seed for variety each day
-                    const kwIndex = (seed + CATEGORY_SOURCES.indexOf(source)) % source.keywords.length;
-                    const keyword = encodeURIComponent(source.keywords[kwIndex]);
-                    const title = source.titles[kwIndex];
-                    // Use Unsplash's free image source (no API key needed, random image)
-                    const url = `https://source.unsplash.com/featured/1600x900/?${keyword}&sig=${seed}`;
-                    await window.saveToFirestore({
-                        id: Date.now() + Math.random(),
-                        url,
-                        title,
-                        category: source.category,
-                        author: '🤖 AI Daily',
-                        timestamp: Date.now()
-                    });
-                    uploaded++;
-                    await new Promise(r => setTimeout(r, 200));
+                    // Pick 2 different batches per category per day
+                    const b1 = (seed + CATEGORY_SOURCES.indexOf(source)) % source.batches.length;
+                    const b2 = (b1 + 2) % source.batches.length;
+                    for (const bIdx of [b1, b2]) {
+                        const { tags, title } = source.batches[bIdx];
+                        // loremflickr: lock param = seed makes same URL return same image (reproducible)
+                        const url = `https://loremflickr.com/1280/960/${tags}?lock=${seed + bIdx}`;
+                        await window.saveToFirestore({
+                            id: Date.now() + Math.random(),
+                            url,
+                            title,
+                            category: source.category,
+                            author: '🤖 AI Daily',
+                            timestamp: Date.now()
+                        });
+                        uploaded++;
+                        await new Promise(r => setTimeout(r, 150));
+                    }
                 } catch (e) { console.warn('Category upload failed:', source.category, e); }
             }
 
