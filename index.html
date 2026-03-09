@@ -1249,10 +1249,15 @@
             <!-- TAB: Manage -->
             <div id="admin-tab-manage" style="display:none;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                    <p style="font-family:'Orbitron',sans-serif;font-size:12px;color:#aaa;">Your added images (<span
+                    <p style="font-family:'Orbitron',sans-serif;font-size:12px;color:#aaa;">Gallery images (<span
                             id="admin-count">0</span>)</p>
-                    <button class="admin-btn-secondary" onclick="adminClearAll()"
-                        style="font-size:11px;padding:7px 16px;">🗑 Clear All</button>
+                    <div style="display:flex;gap:8px;">
+                        <button class="admin-btn-secondary" onclick="forceAutoUpload()"
+                            style="font-size:11px;padding:7px 16px;background:rgba(0,245,255,0.1);border-color:rgba(0,245,255,0.3);color:#00f5ff;"
+                            title="Manually trigger today's auto-upload">🤖 Force Upload</button>
+                        <button class="admin-btn-secondary" onclick="adminClearAll()"
+                            style="font-size:11px;padding:7px 16px;">🗑 Clear All</button>
+                    </div>
                 </div>
                 <div id="admin-manage-grid" class="admin-grid"></div>
                 <p id="admin-empty-msg"
@@ -1882,7 +1887,7 @@
             initParticles();
             loadFavorites();
             dailyQuoteRotation();  // Set today's featured quote
-            setTimeout(dailyAutoUpload, 2500); // Auto-upload after Firebase is ready
+            waitForFirebaseThenUpload(); // Auto-upload once Firebase is confirmed ready
         });
 
         // Wallpaper Functions
@@ -2281,6 +2286,32 @@
             setFeaturedQuote(quotes[todayIndex]);
         }
 
+        // Poll until Firebase is ready then trigger auto-upload
+        function waitForFirebaseThenUpload(attempts = 0) {
+            if (typeof window.checkAndSetDailyUpload === 'function' &&
+                typeof window.saveToFirestore === 'function') {
+                console.log('🔥 Firebase ready — starting daily auto-upload...');
+                dailyAutoUpload();
+            } else if (attempts < 20) {
+                // Retry every 500ms, up to 10 seconds
+                setTimeout(() => waitForFirebaseThenUpload(attempts + 1), 500);
+            } else {
+                console.warn('⚠️ Firebase not ready after 10s — auto-upload skipped.');
+            }
+        }
+
+        // Force re-run auto-upload (clears today's cache first)
+        async function forceAutoUpload() {
+            const today = new Date().toISOString().slice(0, 10);
+            localStorage.removeItem('animeZenDailyUpload_' + today);
+            // Reset RTDB seed so it runs again
+            if (typeof window.resetDailySeed === 'function') {
+                await window.resetDailySeed(today);
+            }
+            showToast('Starting forced auto-upload...', '🤖');
+            await dailyAutoUpload();
+        }
+
         // ─── 🤖 Supercharged Daily Auto-Upload ───────────────────────────────────
         // Adds 20+ images per day across ALL categories automatically. Zero effort!
         async function dailyAutoUpload() {
@@ -2452,12 +2483,22 @@
             try {
                 const seedRef = ref(db, `daily-seed/${today}`);
                 const snapshot = await get(seedRef);
-                if (snapshot.exists()) return true; // Already seeded today
+                if (snapshot.exists()) return true;
                 await set(seedRef, { seeded: true, ts: Date.now() });
-                return false; // We just claimed it — proceed with upload
+                return false;
             } catch (e) {
                 console.warn('Daily seed check failed:', e);
-                return true; // Fail safe — don't upload if we can't check
+                return false; // On error, allow upload to proceed
+            }
+        };
+
+        // 5. Reset daily seed (for force-upload from admin panel)
+        window.resetDailySeed = async (today) => {
+            try {
+                const seedRef = ref(db, `daily-seed/${today}`);
+                await remove(seedRef);
+            } catch (e) {
+                console.warn('Reset seed failed:', e);
             }
         };
 
