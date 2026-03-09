@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Anime Zen</title>
+    <meta name="description"
+        content="Privacy Policy for Anime Zen — how we collect, use and protect your data, including information about Google AdSense and cookies.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devauchiha001.github.io/devawebsite/privacy-policy.html">
+
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5770290841463224"
+        crossorigin="anonymous"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-pink: #ff006e;
+            --neon-cyan: #00f5ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0a0a0f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(188, 19, 254, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 245, 255, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header / Nav */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ff006e, #bc13fe, #00f5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-back {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: rgba(0, 245, 255, 0.7);
+            text-decoration: none;
+            padding: 8px 20px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 999px;
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-back:hover {
+            color: #00f5ff;
+            border-color: rgba(0, 245, 255, 0.6);
+            box-shadow: 0 0 16px rgba(0, 245, 255, 0.2);
+        }
+
+        /* Main container */
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 64px 24px 96px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 64px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--neon-cyan);
+            background: rgba(0, 245, 255, 0.08);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            padding: 6px 18px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 30%, rgba(188, 19, 254, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .last-updated {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.1em;
+        }
+
+        /* Sections */
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 36px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .section:hover {
+            border-color: rgba(188, 19, 254, 0.2);
+        }
+
+        .section-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: var(--neon-purple);
+            letter-spacing: 0.2em;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 .icon {
+            font-size: 22px;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 14px;
+            font-size: 15px;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        ul li {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            padding: 6px 0 6px 24px;
+            position: relative;
+        }
+
+        ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--neon-cyan);
+        }
+
+        a {
+            color: var(--neon-cyan);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(188, 19, 254, 0.07);
+            border: 1px solid rgba(188, 19, 254, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Contact box */
+        .contact-box {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.08), rgba(188, 19, 254, 0.08));
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            border-radius: 16px;
+            padding: 36px;
+            text-align: center;
+            margin-top: 36px;
+        }
+
+        .contact-box h2 {
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .contact-link {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #ff006e, #bc13fe);
+            border-radius: 999px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .contact-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 0, 110, 0.4);
+            text-decoration: none;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px;
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="./index.html" class="nav-brand">⛩️ ANIME ZEN</a>
+        <a href="./index.html" class="nav-back">← Back to Site</a>
+    </nav>
+
+    <main>
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-badge">LEGAL DOCUMENT</div>
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last Updated: March 9, 2026</p>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="section">
+            <div class="section-number">01 / OVERVIEW</div>
+            <h2><span class="icon">📜</span> Introduction</h2>
+            <p>Welcome to <strong style="color:#fff;">Anime Zen</strong> ("we", "us", or "our"), accessible at <a
+                    href="https://devauchiha001.github.io/devawebsite/">devauchiha001.github.io/devawebsite</a>. We are
+                committed to protecting your personal information and your right to privacy.</p>
+            <p>This Privacy Policy explains how we collect, use, and share information when you visit our website. By
+                using Anime Zen, you agree to the terms described in this policy.</p>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section">
+            <div class="section-number">02 / DATA WE COLLECT</div>
+            <h2><span class="icon">📊</span> Information We Collect</h2>
+            <p>We collect minimal data. When you use Anime Zen, the following types of information may be collected:</p>
+            <ul>
+                <li><strong style="color:#fff;">Usage Data</strong> — Pages visited, time spent, browser type, and
+                    device information (collected automatically via Google Analytics/AdSense)</li>
+                <li><strong style="color:#fff;">Cookies</strong> — Small data files stored on your browser used for
+                    remembering your favorites and preferences</li>
+                <li><strong style="color:#fff;">Local Storage</strong> — We use your browser's localStorage to save your
+                    favorite wallpapers and quotes (stored locally, never sent to us)</li>
+                <li><strong style="color:#fff;">Firebase Data</strong> — Image gallery metadata (URLs, titles,
+                    categories) stored in Firebase Realtime Database</li>
+            </ul>
+            <p>We do <strong style="color:#fff;">not</strong> collect your name, email address, or any personally
+                identifiable information unless you contact us directly.</p>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section">
+            <div class="section-number">03 / GOOGLE ADSENSE</div>
+            <h2><span class="icon">💰</span> Google AdSense & Cookies</h2>
+            <p>We use <strong style="color:#fff;">Google AdSense</strong> to display advertisements on this website.
+                Google AdSense uses cookies to serve ads based on your prior visits to our site and other sites on the
+                internet.</p>
+            <div class="highlight">
+                Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit
+                to Anime Zen and/or other sites on the Internet. You may opt out of personalized advertising by visiting
+                <a href="https://www.google.com/settings/ads" target="_blank">Google Ads Settings</a>.
+            </div>
+            <p>For more information on how Google uses data when you use our site, visit: <a
+                    href="https://policies.google.com/technologies/partner-sites" target="_blank">How Google uses data
+                    from sites that use its services</a>.</p>
+            <p>Third-party ad servers or ad networks use technology like cookies, JavaScript, or web beacons in their
+                respective advertisements. They automatically receive your IP address when this occurs.</p>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section">
+            <div class="section-number">04 / THIRD PARTY SERVICES</div>
+            <h2><span class="icon">🔗</span> Third-Party Services</h2>
+            <p>Anime Zen integrates the following third-party services, each with their own privacy policy:</p>
+            <ul>
+                <li><strong style="color:#fff;">Google AdSense</strong> — Advertising: <a
+                        href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+                <li><strong style="color:#fff;">Firebase (Google)</strong> — Database & Hosting: <a
+                        href="https://firebase.google.com/support/privacy" target="_blank">Firebase Privacy Policy</a>
+                </li>
+                <li><strong style="color:#fff;">waifu.im API</strong> — Anime image source: <a
+                        href="https://waifu.im/privacy" target="_blank">waifu.im Privacy</a></li>
+                <li><strong style="color:#fff;">Unsplash</strong> — Stock photography source: <a
+                        href="https://unsplash.com/privacy" target="_blank">Unsplash Privacy Policy</a></li>
+                <li><strong style="color:#fff;">Google Fonts</strong> — Typography: <a
+                        href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+            </ul>
+            <p>We do not control these third-party services and encourage you to review their privacy policies.</p>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="section">
+            <div class="section-number">05 / COOKIES</div>
+            <h2><span class="icon">🍪</span> How We Use Cookies</h2>
+            <p>Cookies are used for the following purposes on Anime Zen:</p>
+            <ul>
+                <li><strong style="color:#fff;">Preferences</strong> — Remembering your favorite wallpapers and quotes
+                    (via localStorage)</li>
+                <li><strong style="color:#fff;">Analytics</strong> — Understanding how visitors use our site (via
+                    Google)</li>
+                <li><strong style="color:#fff;">Advertising</strong> — Displaying relevant ads (via Google AdSense)</li>
+                <li><strong style="color:#fff;">Daily content</strong> — Tracking daily auto-uploads so duplicate images
+                    are not added</li>
+            </ul>
+            <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However,
+                some features of the site may not function properly without cookies.</p>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="section">
+            <div class="section-number">06 / YOUR RIGHTS</div>
+            <h2><span class="icon">⚖️</span> Your Rights</h2>
+            <p>Depending on your location, you may have certain rights regarding your personal data:</p>
+            <ul>
+                <li>The right to <strong style="color:#fff;">access</strong> data we hold about you</li>
+                <li>The right to <strong style="color:#fff;">delete</strong> your data (since we only use local storage,
+                    you can clear this via your browser settings)</li>
+                <li>The right to <strong style="color:#fff;">opt out</strong> of personalized advertising via Google's
+                    opt-out tools</li>
+                <li>The right to <strong style="color:#fff;">object</strong> to certain data processing activities</li>
+            </ul>
+            <p>To exercise any of these rights, contact us using the information below.</p>
+        </div>
+
+        <!-- Section 7 -->
+        <div class="section">
+            <div class="section-number">07 / DATA SECURITY</div>
+            <h2><span class="icon">🔒</span> Data Security</h2>
+            <p>We take the security of your data seriously. All gallery data is stored in <strong
+                    style="color:#fff;">Firebase Realtime Database</strong>, which is secured by Google's
+                infrastructure. We implement reasonable technical measures to protect information.</p>
+            <p>However, no method of transmission over the Internet or method of electronic storage is 100% secure. We
+                cannot guarantee absolute security.</p>
+        </div>
+
+        <!-- Section 8 -->
+        <div class="section">
+            <div class="section-number">08 / CHILDREN'S PRIVACY</div>
+            <h2><span class="icon">👶</span> Children's Privacy</h2>
+            <p>Anime Zen does not knowingly collect personal information from children under 13 years of age. The site
+                displays anime artwork that is entirely <strong style="color:#fff;">Safe For Work (SFW)</strong>. If you
+                believe we have inadvertently collected information from a child, please contact us immediately.</p>
+        </div>
+
+        <!-- Section 9 -->
+        <div class="section">
+            <div class="section-number">09 / CHANGES</div>
+            <h2><span class="icon">🔄</span> Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by updating the
+                "Last Updated" date at the top of this page. We encourage you to review this Privacy Policy
+                periodically.</p>
+            <p>Continued use of Anime Zen after changes are posted constitutes your acceptance of the updated policy.
+            </p>
+        </div>
+
+        <!-- Contact -->
+        <div class="contact-box">
+            <h2><span class="icon">📬</span> Contact Us</h2>
+            <p style="color:rgba(255,255,255,0.5);font-size:14px;">If you have any questions about this Privacy Policy,
+                please reach out:</p>
+            <a href="https://github.com/devauchiha001" target="_blank" class="contact-link">Contact via GitHub →</a>
+            <p style="margin-top:16px;font-size:12px;color:rgba(255,255,255,0.25);">
+                Website: <a href="https://devauchiha001.github.io/devawebsite/">devauchiha001.github.io/devawebsite</a>
+            </p>
+        </div>
+    </main>
+
+    <footer>
+        © 2026 Anime Zen · 魂の美学 · <a href="./index.html" style="color:rgba(188,19,254,0.6);">Back to Gallery</a>
+    </footer>
+
+</body>
+
+</html>
